@@ -13,53 +13,58 @@ inst = []
 file = open('input.txt', 'r')
 for line in file:
     line.rsplit(' \n')
-    inst.append(line)
-
-ip = 0
-while True:
-
-    if ip > len(inst): 
-        break
-
-    line = inst[ip]
-    print('ip={}, inst={}'.format(ip, inst[ip]))
-    print('a={} b={} c={} d={}'.format(reg['a'], reg['b'], reg['c'], reg['d']))
+   
     match = copy.search(line)   
     if match: 
         if match.group(1) in regs:
-            reg[match.group(2)] = reg[match.group(1)]
+            inst.append(['copy_reg', match.group(2), match.group(1)])
         else:
-            reg[match.group(2)] = int(match.group(1))
-        ip += 1
-        continue
+            inst.append(['copy_int', match.group(2), int(match.group(1))])
 
     match = inc.search(line)
     if (match):
-        reg[match.group(1)] += 1
-        ip += 1
-        continue
+        inst.append(['inc', match.group(1)])
     
     match = dec.search(line)
     if (match):
-        reg[match.group(1)] -= 1
-        ip += 1
-        continue
+        inst.append(['dec', match.group(1)])
 
     match = jnz.search(line)
     if (match):
         if match.group(1) in regs:
-            if reg[match.group(1)] != 0:
-                ip += int(match.group(2))
-            else:
-                ip += 1
+            inst.append(['jnz_reg', match.group(1), int(match.group(2))])
         else:
-            if match.group(1) != 0:
-                ip += int(match.group(2))
-            else:
-                ip += 1
+            inst.append(['jnz_int', int(match.group(1)), int(match.group(2))])
+
+ip = 0
+while True:
+
+    if ip >= len(inst): 
+        break
+
+    line = inst[ip]
+
+    if line[0] == 'copy_reg':
+        reg[line[1]] = reg[line[2]]
+    elif line[0] == 'copy_int':
+        reg[line[1]] = line[2]
+    elif line[0] == 'inc':
+        reg[line[1]] += 1
+    elif line[0] == 'dec':
+        reg[line[1]] -= 1
+    elif line[0] == 'jnz_reg':
+        if reg[line[1]] != 0:
+            ip += line[2]
+        else:
+            ip += 1
+        continue
+    elif line[0] == 'jnz_int':
+        if line[1] != 0:
+            ip += line[2]
+        else:
+            ip+= 1
         continue
 
-    print('Error - instruction={} at ip={} not parsed'.format(inst[ip], ip))
-    quit()
-
-print('a = {}'.format(reg[a]))
+    ip += 1
+            
+print('a = {}'.format(reg['a']))
