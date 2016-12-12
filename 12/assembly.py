@@ -7,7 +7,7 @@ jnz = re.compile('jnz ([0-9abcd]+) ([0-9\-]+)')
 
 regs = 'abcd'
 
-reg = {'a':0, 'b':0, 'c':0, 'd':0}
+reg = {'a':0, 'b':0, 'c':1, 'd':0}
 inst = []
 
 file = open('input.txt', 'r')
@@ -17,8 +17,13 @@ for line in file:
 
 ip = 0
 while True:
+
+    if ip > len(inst): 
+        break
+
     line = inst[ip]
     print('ip={}, inst={}'.format(ip, inst[ip]))
+    print('a={} b={} c={} d={}'.format(reg['a'], reg['b'], reg['c'], reg['d']))
     match = copy.search(line)   
     if match: 
         if match.group(1) in regs:
@@ -47,12 +52,14 @@ while True:
                 ip += int(match.group(2))
             else:
                 ip += 1
-            continue
         else:
             if match.group(1) != 0:
                 ip += int(match.group(2))
             else:
                 ip += 1
-            continue
-          
+        continue
+
+    print('Error - instruction={} at ip={} not parsed'.format(inst[ip], ip))
+    quit()
+
 print('a = {}'.format(reg[a]))
